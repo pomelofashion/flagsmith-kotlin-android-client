@@ -4,6 +4,7 @@ import kotlinx.kover.api.VerificationTarget
 import kotlinx.kover.api.VerificationValueType
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
+import org.jetbrains.kotlin.konan.properties.Properties
 import java.util.Date
 
 plugins {
@@ -150,12 +151,34 @@ fun tableLine(length: Int, leading: String, trailing: String) =
 publishing {
     publications {
         register<MavenPublication>("release") {
-            groupId = "com.github.Flagsmith"
+            groupId = "com.pomelofashion"
             artifactId = "flagsmith-kotlin-android-client"
-            version = "1.0.0"
+            version = "1.0.1"
+            artifact("$buildDir/outputs/aar/FlagsmithClient-release.aar")
 
-            afterEvaluate {
-                from(components["release"])
+            pom {
+                withXml {
+                    val dependenciesNode = asNode().appendNode("dependencies")
+
+                    project.configurations.implementation.get().allDependencies.forEach {
+                        if (it.group != null || it.version != null || it.name != "unspecified") {
+                            val dependencyNode = dependenciesNode.appendNode("dependency")
+                            dependencyNode.appendNode("groupId", it.group)
+                            dependencyNode.appendNode("artifactId", it.name)
+                            dependencyNode.appendNode("version", it.version)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/pomelofashion/mobile-android")
+            credentials {
+                username = System.getenv("USERNAME")
+                password = System.getenv("GH_TOKEN")
             }
         }
     }
