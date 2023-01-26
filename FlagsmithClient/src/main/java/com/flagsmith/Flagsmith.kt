@@ -41,9 +41,9 @@ class Flagsmith constructor(
         const val DEFAULT_ANALYTICS_FLUSH_PERIOD_SECONDS = 10
     }
 
-    fun getFeatureFlags(identity: String? = null, result: (Result<List<Flag>>) -> Unit) {
+    fun getFeatureFlags(identity: String? = null, traits: List<Trait>, result: (Result<List<Flag>>) -> Unit) {
         if (identity != null) {
-            getIdentityFlagsAndTraits(identity) { res ->
+            getIdentityFlagsAndTraits(identity, traits) { res ->
                 result(res.map { it.flags })
             }
         } else {
@@ -57,16 +57,18 @@ class Flagsmith constructor(
     fun hasFeatureFlag(
         featureId: String,
         identity: String? = null,
+        traits: List<Trait>,
         result: (Result<Boolean>) -> Unit
-    ) = getFeatureFlag(featureId, identity) { res ->
+    ) = getFeatureFlag(featureId, identity, traits) { res ->
         result(res.map { flag -> flag != null })
     }
 
     fun getValueForFeature(
         featureId: String,
         identity: String? = null,
+        traits: List<Trait>,
         result: (Result<Any?>) -> Unit
-    ) = getFeatureFlag(featureId, identity) { res ->
+    ) = getFeatureFlag(featureId, identity, traits) { res ->
         result(res.map { flag -> flag?.featureStateValue })
     }
 
@@ -88,13 +90,14 @@ class Flagsmith constructor(
     }
 
     fun getIdentity(identity: String, result: (Result<IdentityFlagsAndTraits>) -> Unit) =
-        getIdentityFlagsAndTraits(identity, result)
+        getIdentityFlagsAndTraits(identity, null, result)
 
     private fun getFeatureFlag(
         featureId: String,
         identity: String?,
+        traits: List<Trait>,
         result: (Result<Flag?>) -> Unit
-    ) = getFeatureFlags(identity) { res ->
+    ) = getFeatureFlags(identity, traits) { res ->
         result(res.map { flags ->
             val foundFlag = flags.find { flag -> flag.feature.name == featureId && flag.enabled }
             analytics?.trackEvent(featureId)
@@ -104,8 +107,9 @@ class Flagsmith constructor(
 
     private fun getIdentityFlagsAndTraits(
         identity: String,
+        traits: List<Trait>? = null,
         result: (Result<IdentityFlagsAndTraits>) -> Unit
-    ) = Fuel.request(FlagsmithApi.GetIdentityFlagsAndTraits(identity = identity))
+    ) = Fuel.request(FlagsmithApi.GetIdentityFlagsAndTraits(identity = identity, traits = traits))
         .responseObject(IdentityFlagsAndTraitsDeserializer()) { _, _, res ->
             result(res.convertToResult())
         }

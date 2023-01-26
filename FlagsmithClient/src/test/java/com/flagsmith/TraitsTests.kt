@@ -3,6 +3,7 @@ package com.flagsmith
 import com.flagsmith.entities.Trait
 import com.flagsmith.mockResponses.MockEndpoint
 import com.flagsmith.mockResponses.mockResponseFor
+import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -103,5 +104,14 @@ class TraitsTests {
                 result.getOrThrow().traits.find { trait -> trait.key == "favourite-colour" }?.value
             )
         }
+    }
+
+    @Test
+    fun testTraitToJson() {
+        val traits = listOf(
+            Trait(key = "key", value = "value")
+        )
+        val json = Gson().toJson(mapOf("traits" to traits))
+        assertEquals("{\"traits\":[{\"trait_key\":\"key\",\"trait_value\":\"value\"}]}", json)
     }
 }
