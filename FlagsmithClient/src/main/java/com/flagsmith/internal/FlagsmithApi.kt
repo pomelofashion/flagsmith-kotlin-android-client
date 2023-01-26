@@ -10,7 +10,7 @@ import com.github.kittinunf.fuel.util.FuelRouting
 import com.google.gson.Gson
 
 sealed class FlagsmithApi : FuelRouting {
-    class GetIdentityFlagsAndTraits(val identity: String) : FlagsmithApi()
+    class GetIdentityFlagsAndTraits(val identity: String, val traits: List<Trait>? = null) : FlagsmithApi()
     object GetFlags : FlagsmithApi()
     class SetTrait(val trait: Trait, val identity: String) : FlagsmithApi()
     class PostAnalytics(val eventMap: Map<String, Int?>) : FlagsmithApi()
@@ -38,6 +38,13 @@ sealed class FlagsmithApi : FuelRouting {
                 )
             )
             is PostAnalytics -> Gson().toJson(eventMap)
+            is GetIdentityFlagsAndTraits -> Gson().toJson(
+                mutableMapOf<String, Any>("identifier" to identity).apply {
+                    if (!traits.isNullOrEmpty()) {
+                        this += "traits" to traits
+                    }
+                }
+            )
             else -> null
         }
 
@@ -54,7 +61,7 @@ sealed class FlagsmithApi : FuelRouting {
 
     override val method: Method
         get() = when (this) {
-            is GetIdentityFlagsAndTraits -> Method.GET
+            is GetIdentityFlagsAndTraits -> Method.POST
             is GetFlags -> Method.GET
             is SetTrait -> Method.POST
             is PostAnalytics -> Method.POST

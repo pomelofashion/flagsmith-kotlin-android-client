@@ -8,13 +8,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun Flagsmith.hasFeatureFlagSync(forFeatureId: String, identity: String? = null): Result<Boolean>
-    = suspendCoroutine { cont -> this.hasFeatureFlag(forFeatureId, identity = identity) { cont.resume(it) } }
+    = suspendCoroutine { cont -> this.hasFeatureFlag(forFeatureId, identity = identity, traits = emptyList()) { cont.resume(it) } }
 
 suspend fun Flagsmith.getFeatureFlagsSync(identity: String? = null) : Result<List<Flag>>
-    = suspendCoroutine { cont -> this.getFeatureFlags(identity = identity) { cont.resume(it) } }
+    = suspendCoroutine { cont -> this.getFeatureFlags(identity = identity, traits = emptyList()) { cont.resume(it) } }
 
 suspend fun Flagsmith.getValueForFeatureSync(forFeatureId: String, identity: String? = null): Result<Any?>
-    = suspendCoroutine { cont -> this.getValueForFeature(forFeatureId, identity = identity) { cont.resume(it) } }
+    = suspendCoroutine { cont -> this.getValueForFeature(forFeatureId, identity = identity, traits = emptyList()) { cont.resume(it) } }
 
 suspend fun Flagsmith.getTraitsSync(identity: String): Result<List<Trait>>
     = suspendCoroutine { cont -> this.getTraits(identity) { cont.resume(it) } }
