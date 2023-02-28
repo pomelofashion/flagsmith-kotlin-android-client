@@ -92,6 +92,22 @@ class TraitsTests {
     }
 
     @Test
+    fun testSetTraits() {
+        mockServer.mockResponseFor(MockEndpoint.SET_TRAITS)
+        runBlocking {
+            val result = flagsmith.setTraitsSync(trait = arrayOf(
+                Trait(key = "set-from-client", value = "12345"),
+                Trait(key = "set-from-client", value = "12345"),
+                Trait(key = "set-from-client", value = "12345"),
+                Trait(key = "set-from-client", value = "12345")
+            ), "person")
+            assertTrue(result.isSuccess)
+            assertTrue(result.getOrThrow().traits.isNotEmpty())
+            assertTrue(result.getOrThrow().flags.isNotEmpty())
+        }
+    }
+
+    @Test
     fun testGetIdentity() {
         mockServer.mockResponseFor(MockEndpoint.GET_IDENTITIES)
         runBlocking {

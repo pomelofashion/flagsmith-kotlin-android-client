@@ -11,6 +11,7 @@ class TraitWithIdentityDeserializer: ResponseDeserializable<TraitWithIdentity> {
     }
 }
 
+
 data class Trait(
     val identifier: String? = null,
     @SerializedName(value = "trait_key") val key: String,
@@ -21,4 +22,9 @@ data class TraitWithIdentity(
     @SerializedName(value = "trait_key") val key: String,
     @SerializedName(value = "trait_value") val value: String,
     val identity: Identity
+)
+
+data class TraitsWithIdentity(
+    val identifier: String? = null,
+    val traits: List<Trait> = emptyList()
 )
