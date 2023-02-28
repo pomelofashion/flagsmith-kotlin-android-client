@@ -89,6 +89,13 @@ class Flagsmith constructor(
             }
     }
 
+    fun setTraits(vararg trait: Trait, identity: String, result: (Result<IdentityFlagsAndTraits>) -> Unit) {
+        Fuel.request(FlagsmithApi.SetTraits(trait = trait, identity = identity))
+            .responseObject(IdentityFlagsAndTraitsDeserializer()) { _, _, res ->
+                result(res.convertToResult())
+            }
+    }
+
     fun getIdentity(identity: String, result: (Result<IdentityFlagsAndTraits>) -> Unit) =
         getIdentityFlagsAndTraits(identity, null, result)
 

@@ -8,7 +8,8 @@ import org.mockserver.model.MediaType
 enum class MockEndpoint(val path: String, val body: String) {
     GET_IDENTITIES("/identities/", MockResponses.getIdentities),
     GET_FLAGS("/flags/", MockResponses.getFlags),
-    SET_TRAIT("/traits/", MockResponses.setTrait)
+    SET_TRAIT("/traits/", MockResponses.setTrait),
+    SET_TRAITS("/identities/",MockResponses.getIdentities)
 }
 
 fun ClientAndServer.mockResponseFor(endpoint: MockEndpoint) {
