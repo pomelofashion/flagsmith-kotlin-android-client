@@ -21,3 +21,10 @@ To run the integration tests and develop using this repository you'll need to se
 ```bash
 ENVIRONMENT_KEY=F5X.... ./gradlew clean :FlagsmithClient:testDebugUnitTest
 ```
+
+## To publish artifact to mobile-android repository
+1. Change the version name, the major, minor and patch version should follow the base version of original repository we rely on
+2. Run command to publish the package
+```bash
+./gradlew assembleRelease publish
+```
