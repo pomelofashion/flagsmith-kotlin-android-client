@@ -153,7 +153,7 @@ publishing {
         register<MavenPublication>("release") {
             groupId = "com.pomelofashion"
             artifactId = "flagsmith-kotlin-android-client"
-            version = "1.0.1.4"
+            version = "1.0.1.5"
             artifact("$buildDir/outputs/aar/FlagsmithClient-release.aar")
 
             pom {
