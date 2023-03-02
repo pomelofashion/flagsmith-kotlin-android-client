@@ -41,13 +41,18 @@ class Flagsmith constructor(
         const val DEFAULT_ANALYTICS_FLUSH_PERIOD_SECONDS = 10
     }
 
-    fun getFeatureFlags(identity: String? = null, traits: List<Trait>, result: (Result<List<Flag>>) -> Unit) {
+    fun getFeatureFlags(
+        identity: String? = null,
+        traits: List<Trait>,
+        timeout: Long = 15_000L,
+        result: (Result<List<Flag>>) -> Unit) {
         if (identity != null) {
-            getIdentityFlagsAndTraits(identity, traits) { res ->
+            getIdentityFlagsAndTraits(identity, traits, timeout) { res ->
                 result(res.map { it.flags })
             }
         } else {
             Fuel.request(FlagsmithApi.GetFlags)
+                .timeout(timeout.toInt())
                 .responseObject(FlagListDeserializer()) { _, _, res ->
                     result(res.convertToResult())
                 }
@@ -58,8 +63,9 @@ class Flagsmith constructor(
         featureId: String,
         identity: String? = null,
         traits: List<Trait>,
+        timeout: Long = 15_000L,
         result: (Result<Boolean>) -> Unit
-    ) = getFeatureFlag(featureId, identity, traits) { res ->
+    ) = getFeatureFlag(featureId, identity, traits, timeout) { res ->
         result(res.map { flag -> flag != null })
     }
 
@@ -67,42 +73,64 @@ class Flagsmith constructor(
         featureId: String,
         identity: String? = null,
         traits: List<Trait>,
+        timeout: Long = 15_000L,
         result: (Result<Any?>) -> Unit
-    ) = getFeatureFlag(featureId, identity, traits) { res ->
+    ) = getFeatureFlag(featureId, identity, traits, timeout) { res ->
         result(res.map { flag -> flag?.featureStateValue })
     }
 
-    fun getTrait(id: String, identity: String, result: (Result<Trait?>) -> Unit) =
-        getIdentityFlagsAndTraits(identity) { res ->
+    fun getTrait(
+        id: String,
+        identity: String,
+        timeout: Long = 15_000L,
+        result: (Result<Trait?>) -> Unit) =
+        getIdentityFlagsAndTraits(identity, timeout = timeout) { res ->
             result(res.map { value -> value.traits.find { it.key == id } })
         }
 
-    fun getTraits(identity: String, result: (Result<List<Trait>>) -> Unit) =
-        getIdentityFlagsAndTraits(identity) { res ->
+    fun getTraits(
+        identity: String,
+        timeout: Long = 15_000L,
+        result: (Result<List<Trait>>) -> Unit) =
+        getIdentityFlagsAndTraits(identity, timeout = timeout) { res ->
             result(res.map { it.traits })
         }
 
-    fun setTrait(trait: Trait, identity: String, result: (Result<TraitWithIdentity>) -> Unit) {
+    fun setTrait(
+        trait: Trait,
+        identity: String,
+        timeout: Long = 15_000L,
+        result: (Result<TraitWithIdentity>) -> Unit) {
         Fuel.request(FlagsmithApi.SetTrait(trait = trait, identity = identity))
+            .timeout(timeout.toInt())
             .responseObject(TraitWithIdentityDeserializer()) { _, _, res ->
                 result(res.convertToResult())
             }
     }
 
-    fun setTraits(vararg trait: Trait, identity: String, result: (Result<IdentityFlagsAndTraits>) -> Unit) {
+    fun setTraits(
+        vararg trait: Trait,
+        identity: String,
+        timeout: Long = 15_000L,
+        result: (Result<IdentityFlagsAndTraits>) -> Unit) {
         Fuel.request(FlagsmithApi.SetTraits(trait = trait, identity = identity))
+            .timeout(timeout.toInt())
             .responseObject(IdentityFlagsAndTraitsDeserializer()) { _, _, res ->
                 result(res.convertToResult())
             }
     }
 
-    fun getIdentity(identity: String, result: (Result<IdentityFlagsAndTraits>) -> Unit) =
-        getIdentityFlagsAndTraits(identity, null, result)
+    fun getIdentity(
+        identity: String,
+        timeout: Long = 15_000L,
+        result: (Result<IdentityFlagsAndTraits>) -> Unit) =
+        getIdentityFlagsAndTraits(identity, null, timeout, result)
 
     private fun getFeatureFlag(
         featureId: String,
         identity: String?,
         traits: List<Trait>,
+        timeout: Long = 15_000L,
         result: (Result<Flag?>) -> Unit
     ) = getFeatureFlags(identity, traits) { res ->
         result(res.map { flags ->
@@ -115,8 +143,10 @@ class Flagsmith constructor(
     private fun getIdentityFlagsAndTraits(
         identity: String,
         traits: List<Trait>? = null,
+        timeout: Long = 15_000L,
         result: (Result<IdentityFlagsAndTraits>) -> Unit
     ) = Fuel.request(FlagsmithApi.GetIdentityFlagsAndTraits(identity = identity, traits = traits))
+        .timeout(timeout.toInt())
         .responseObject(IdentityFlagsAndTraitsDeserializer()) { _, _, res ->
             result(res.convertToResult())
         }
